@@ -1,24 +1,24 @@
+import api.client.OrdersClient;
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import jsons.Order;
-import jsons.TrackNumber;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(Parameterized.class)
 public class OrderCreationParametrizedTest {
-    private final String[] color;
+    private final String black;
+    private final String grey;
 
-    public OrderCreationParametrizedTest(String[] color) {
-        this.color = color;
+    public OrderCreationParametrizedTest(String black, String grey) {
+        this.black = black;
+        this.grey = grey;
     }
 
     @Before
@@ -27,40 +27,27 @@ public class OrderCreationParametrizedTest {
         RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
     }
 
-    @Parameterized.Parameters
-    public static Object[][] getColor() {
+    @Parameterized.Parameters(name = "Тестовые данные:{0},{1}")
+    public static Object[][] getCredentials() {
         return new Object[][]{
-                {new String[]{"Black"}},
-                {new String[]{"Grey"}},
-                {new String[]{"Black", "Grey"}},
-                {new String[]{}},
+                {"Black", null},
+                {null, "Gray"},
+                {"Black", "Gray"},
+                {null, null}
         };
     }
 
     @Test
     @DisplayName("Можно указать один из цветов — BLACK или GREY или оба")
     public void createOrderWithColor() {
-        Order order = new Order(color);
-        Response response = given()
-                .header("Content-type", "application/json")
-                .body(order)
-                .post("/api/v1/orders");
+        OrdersClient ordersClient = new OrdersClient();
+        Response response = ordersClient.createOrder();
         response.then().body("track", notNullValue());
     }
 
     @After
-    @Step("Отмена заказа")
     public void deleteData() {
-        Order order = new Order();
-        Response response = given()
-                .header("Content-type", "application/json")
-                .body(order)
-                .post("/api/v1/orders");
-        TrackNumber trackNumber = response.body()
-                .as(TrackNumber.class);
-
-        given().header("Content-type", "application/json")
-                .body(trackNumber.getTrack())
-                .put("/api/v1/orders/cancel" );
+        OrdersClient ordersClient = new OrdersClient();
+        ordersClient.cancelOrder();
     }
 }

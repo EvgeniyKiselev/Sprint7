@@ -1,4 +1,4 @@
-package jsons;
+package api.model;
 
 public class Order {
     private String firstName;

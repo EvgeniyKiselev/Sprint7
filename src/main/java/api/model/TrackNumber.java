@@ -1,4 +1,4 @@
-package jsons;
+package api.model;
 
 public class TrackNumber {
     private String track;

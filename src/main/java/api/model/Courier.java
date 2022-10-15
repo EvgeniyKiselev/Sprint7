@@ -1,4 +1,4 @@
-package jsons;
+package api.model;
 
 public class Courier {
     private String login;
@@ -16,7 +16,8 @@ public class Courier {
         this.password = password;
     }
 
-    public Courier() {}
+    public Courier() {
+    }
 
     public String getLogin() {
         return login;
